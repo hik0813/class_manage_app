@@ -21,18 +21,23 @@ export default function PushSubscribeCard() {
   const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !vapidKey) {
-      setStatus("unsupported");
-      return;
-    }
-    if (Notification.permission === "denied") {
-      setStatus("denied");
-      return;
-    }
-    navigator.serviceWorker.ready.then(async (reg) => {
-      const sub = await reg.pushManager.getSubscription();
-      setStatus(sub ? "subscribed" : "unsubscribed");
-    });
+    let cancelled = false;
+    (async () => {
+      let next: Status;
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !vapidKey) {
+        next = "unsupported";
+      } else if (Notification.permission === "denied") {
+        next = "denied";
+      } else {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        next = sub ? "subscribed" : "unsubscribed";
+      }
+      if (!cancelled) setStatus(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [vapidKey]);
 
   async function subscribe() {
