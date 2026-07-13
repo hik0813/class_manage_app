@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* 다크모드: html에 .dark 클래스가 붙으면 적용 (수동 토글 + 시스템 감지) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #4f46e5;
+  --primary-soft: #eef2ff;
+}
+
+.dark {
+  --background: #0b1120;
+  --surface: #111a2e;
+  --surface-hover: #1a2540;
+  --foreground: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #24304d;
+  --primary: #818cf8;
+  --primary-soft: #1e2352;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --font-sans: var(--font-geist-sans), "Apple SD Gothic Neo", "Pretendard",
+    "Noto Sans KR", sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* 스켈레톤 로딩 */
+.skeleton {
+  @apply animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700/50;
+}
+
+/* 자리배치 셔플 애니메이션 */
+@keyframes seat-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.seat-pop {
+  animation: seat-pop 0.35s ease-out both;
+}
+
+@keyframes seat-shuffle {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(2px, -3px) rotate(1.5deg);
+  }
+  50% {
+    transform: translate(-3px, 2px) rotate(-1.5deg);
+  }
+  75% {
+    transform: translate(2px, 2px) rotate(1deg);
+  }
+}
+.seat-shuffle {
+  animation: seat-shuffle 0.3s linear infinite;
+}
