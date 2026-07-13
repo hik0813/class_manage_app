@@ -21,6 +21,7 @@ function LoginForm() {
     setLoading(true);
 
     const supabase = createClient();
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -62,6 +63,7 @@ function LoginForm() {
           <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
             이메일
           </label>
+
           <input
             id="email"
             type="email"
@@ -73,6 +75,7 @@ function LoginForm() {
             placeholder="you@example.com"
           />
         </div>
+
         <div>
           <label
             htmlFor="password"
@@ -80,6 +83,7 @@ function LoginForm() {
           >
             비밀번호
           </label>
+
           <input
             id="password"
             type="password"
@@ -98,10 +102,22 @@ function LoginForm() {
           </p>
         )}
 
-        <button type="submit" disabled={loading} className={buttonStyles.primary}>
+        <button
+          type="submit"
+          disabled={loading}
+          className={buttonStyles.primary}
+        >
           {loading ? "로그인 중..." : "로그인"}
         </button>
       </form>
+
+      {/* 게스트 버튼 */}
+      <Link
+        href="/"
+        className="mt-3 flex h-11 items-center justify-center rounded-xl border border-gray-300 bg-white text-sm font-medium transition hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+      >
+        👀 게스트로 둘러보기
+      </Link>
 
       <p className="mt-4 text-center text-sm text-muted">
         아직 계정이 없나요?{" "}
