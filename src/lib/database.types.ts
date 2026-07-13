@@ -14,7 +14,7 @@ export type NotificationType =
   | "etc";
 export type SeatConstraintType = "no_pair" | "no_adjacent" | "fixed";
 
-export interface Profile {
+export type Profile = {
   id: string;
   name: string;
   role: UserRole;
@@ -24,21 +24,21 @@ export interface Profile {
   created_at: string;
 }
 
-export interface NotificationPrefs {
+export type NotificationPrefs = {
   notice: boolean;
   dday: boolean;
   suggestion: boolean;
   seating: boolean;
 }
 
-export interface TimetableCell {
+export type TimetableCell = {
   id: number;
   day_of_week: number; // 1(월) ~ 5(금)
   period: number; // 1교시 ~
   subject: string;
 }
 
-export interface TimetableOverride {
+export type TimetableOverride = {
   id: number;
   date: string; // YYYY-MM-DD
   period: number;
@@ -46,18 +46,18 @@ export interface TimetableOverride {
   note: string | null;
 }
 
-export interface Meal {
+export type Meal = {
   date: string; // YYYY-MM-DD (PK)
   menu: string;
 }
 
 /** 과목별 시험 범위: [{ subject: "수학", scope: "1단원~3단원" }] */
-export interface ExamScopeItem {
+export type ExamScopeItem = {
   subject: string;
   scope: string;
 }
 
-export interface ClassEvent {
+export type ClassEvent = {
   id: number;
   type: EventType;
   title: string;
@@ -68,7 +68,7 @@ export interface ClassEvent {
   created_at: string;
 }
 
-export interface Notice {
+export type Notice = {
   id: number;
   title: string;
   content: string;
@@ -79,7 +79,7 @@ export interface Notice {
   updated_at: string;
 }
 
-export interface SeatLayout {
+export type SeatLayout = {
   id: number;
   name: string;
   rows: number;
@@ -89,7 +89,7 @@ export interface SeatLayout {
 }
 
 /** 좌석 배정 스냅샷 한 건 = 배치 이력 한 건 */
-export interface SeatAssignment {
+export type SeatAssignment = {
   id: number;
   layout_id: number;
   /** seat_index → student_id 매핑. 배열 인덱스가 좌석 번호 */
@@ -98,14 +98,14 @@ export interface SeatAssignment {
   assigned_at: string;
 }
 
-export interface SeatConstraint {
+export type SeatConstraint = {
   id: number;
   type: SeatConstraintType;
   student_ids: string[];
   seat_index: number | null; // fixed 전용
 }
 
-export interface Suggestion {
+export type Suggestion = {
   id: number;
   author_id: string;
   is_anonymous: boolean;
@@ -117,7 +117,7 @@ export interface Suggestion {
   created_at: string;
 }
 
-export interface AppNotification {
+export type AppNotification = {
   id: number;
   user_id: string;
   type: NotificationType;
@@ -128,7 +128,7 @@ export interface AppNotification {
   created_at: string;
 }
 
-export interface PushSubscriptionRow {
+export type PushSubscriptionRow = {
   id: number;
   user_id: string;
   endpoint: string;
@@ -146,7 +146,7 @@ type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Relationships: [];
 };
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: TableDef<Profile>;
