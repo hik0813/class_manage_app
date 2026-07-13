@@ -6,16 +6,30 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/env";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
+/**
+ * 로그인 없이 접근 가능한 페이지
+ */
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/signup",
+  "/auth",
+  "/timetable",
+  "/meals",
+  "/calendar",
+  "/dday",
+  "/notices",
+];
 
 /**
- * 인증 미들웨어(proxy):
- * 1. Supabase 세션 토큰 갱신
- * 2. 비로그인 사용자 → /login 리다이렉트
- * 3. 학생의 /admin 접근 차단 (DB의 RLS로도 이중 방어됨)
+ * 인증 미들웨어(proxy)
+ * 1. Supabase 세션 갱신
+ * 2. 공개 페이지는 로그인 없이 접근 허용
+ * 3. 비공개 페이지는 로그인 필요
+ * 4. /admin은 관리자만 접근 가능
  */
 export async function proxy(request: NextRequest) {
-  // Supabase 미설정 상태(로컬 초기 세팅 전)에는 통과시켜 안내 화면을 보여준다.
+  // Supabase 미설정 상태에서는 그대로 통과
   if (!isSupabaseConfigured) {
     return NextResponse.next();
   }
@@ -31,7 +45,9 @@ export async function proxy(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value)
         );
+
         response = NextResponse.next({ request });
+
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options)
         );
@@ -44,8 +60,14 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
+  const isPublic =
+    pathname === "/" ||
+    PUBLIC_PATHS
+      .filter((p) => p !== "/")
+      .some((p) => pathname.startsWith(p));
+
+  // 로그인 안 했고 공개 페이지도 아니면 로그인
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -53,20 +75,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublic && !pathname.startsWith("/auth")) {
+  // 로그인한 사용자가 로그인/회원가입 페이지 접근 시 홈으로
+  if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = "";
     return NextResponse.redirect(url);
   }
 
-  // 관리자 전용 구역 보호
+  // 관리자만 /admin 접근 가능
   if (user && pathname.startsWith("/admin")) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
+
     if (profile?.role !== "admin") {
       const url = request.nextUrl.clone();
       url.pathname = "/";
@@ -80,9 +104,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * 정적 파일과 공개 API(cron, push 수신)를 제외한 모든 경로에 적용
-     */
     "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons|api/cron).*)",
   ],
 };
