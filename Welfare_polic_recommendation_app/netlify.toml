@@ -1,0 +1,9 @@
+# Netlify 배포 설정 — 복지 추천 웹사이트
+# 이 폴더(Welfare_polic_recommendation_app)를 배포 루트로 지정했을 때 기준
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
