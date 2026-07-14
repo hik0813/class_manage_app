@@ -96,8 +96,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: flex; align-items: center; justify-content: space-between;
   gap: 0.8rem; flex-wrap: wrap;
 }
-.brand { display: flex; align-items: center; gap: 0.6rem; }
-.brand-icon { font-size: 1.9rem; }
+.brand { display: flex; align-items: center; gap: 0.7rem; }
+.brand-mark {
+  width: 14px; height: 38px; border-radius: 7px;
+  background: linear-gradient(180deg, var(--c-primary), var(--c-accent));
+  flex-shrink: 0;
+}
+html.high-contrast .brand-mark { background: var(--c-primary); }
 .brand-title { font-size: 1.15rem; font-weight: 800; color: var(--c-text); }
 .brand-sub { font-size: 0.82rem; color: var(--c-text-sub); }
 
@@ -193,14 +198,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .q-head { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.4rem; }
 .q-title { font-size: 1.35rem; font-weight: 800; flex: 1; }
 .q-tools { display: flex; gap: 0.4rem; flex-shrink: 0; }
-.icon-btn {
-  min-width: 44px; min-height: 44px;
+.tool-btn {
+  min-height: 44px;
+  padding: 0.3rem 0.8rem;
   border: 2px solid var(--c-border);
   border-radius: 10px;
   background: var(--c-card);
-  font-size: 1.1rem;
+  color: var(--c-text-sub);
+  font-size: 0.88rem; font-weight: 700;
 }
-.icon-btn:hover { border-color: var(--c-primary); }
+.tool-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }
 
 .q-desc { color: var(--c-text-sub); margin-bottom: 1.1rem; font-size: 0.98rem; }
 
@@ -238,7 +245,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .choice-btn.selected {
   background: var(--c-primary); color: #fff; border-color: var(--c-primary-dark);
 }
-.choice-btn .choice-emoji { font-size: 1.4rem; flex-shrink: 0; }
+.choice-btn.selected::before { border-color: #fff; background: #fff; box-shadow: inset 0 0 0 3px var(--c-primary); }
+.choice-btn::before {
+  content: "";
+  width: 20px; height: 20px; flex-shrink: 0;
+  border: 2px solid var(--c-border);
+  border-radius: 50%;
+  transition: border-color 0.15s ease;
+}
+html.high-contrast .choice-btn.selected::before { box-shadow: inset 0 0 0 3px #000; }
 .choice-btn .choice-sub { display: block; font-size: 0.82rem; font-weight: 400; opacity: 0.85; }
 
 .field-row { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; margin: 0.8rem 0; }
@@ -311,7 +326,14 @@ html.high-contrast .validation-msg { color: #ff9c9c; }
 .section-title {
   font-size: 1.15rem; font-weight: 800;
   margin: 1.6rem 0 0.8rem;
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex; align-items: center; gap: 0.55rem;
+}
+.section-title::before {
+  content: "";
+  width: 5px; height: 1.15em;
+  border-radius: 3px;
+  background: var(--c-primary);
+  flex-shrink: 0;
 }
 
 .result-card {
@@ -401,18 +423,6 @@ html.high-contrast .badge.fit { background: #003317; color: #7fffab; border-colo
   color: var(--c-text-sub);
 }
 
-/* AI 설정 패널 */
-.ai-settings {
-  background: var(--c-card);
-  border: 2px dashed var(--c-border);
-  border-radius: var(--radius);
-  padding: 1rem 1.2rem;
-  margin-bottom: 1.2rem;
-  font-size: 0.95rem;
-}
-.ai-settings summary { font-weight: 800; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
-.ai-settings .field-row { margin-top: 0.7rem; }
-
 /* ---------- 푸터 ---------- */
 .site-footer {
   background: var(--c-card);
@@ -442,7 +452,7 @@ html.high-contrast .badge.fit { background: #003317; color: #7fffab; border-colo
 
 /* ---------- 인쇄 ---------- */
 @media print {
-  .site-header, .site-footer, .wizard-nav, .results-actions, .card-actions, .a11y-bar, .ai-settings { display: none !important; }
+  .site-header, .site-footer, .wizard-nav, .results-actions, .card-actions, .a11y-bar { display: none !important; }
   body { background: #fff; }
   .result-card { box-shadow: none; break-inside: avoid; }
 }

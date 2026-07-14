@@ -14,7 +14,6 @@ const state = {
   fontLevel: 1,          // 0: 기본, 1: 크게 아님 — 실제로는 0/1/2 (기본/크게/매우크게)
   highContrast: false,
   stepIndex: 0,
-  apiKey: "",            // 방식 B: 메모리에만 보관, 저장하지 않음
   serverlessAvailable: null, // 방식 A 엔드포인트 사용 가능 여부 캐시
   profile: {
     ageMin: null, ageMax: null, ageLabel: "",
@@ -128,12 +127,12 @@ const steps = [
     help: "복지 서비스마다 지원 대상 나이가 정해져 있어요. 예를 들어 기초연금은 65세 이상, 청년월세지원은 19~34세가 대상입니다.",
     render(box) {
       const bands = [
-        { label: "0~7세 (영유아·미취학)", emoji: "👶", min: 0, max: 7 },
-        { label: "8~18세 (학생)", emoji: "🎒", min: 8, max: 18 },
-        { label: "19~34세 (청년)", emoji: "🧑", min: 19, max: 34 },
-        { label: "35~59세 (중장년)", emoji: "🧑‍💼", min: 35, max: 59 },
-        { label: "60~64세", emoji: "🧓", min: 60, max: 64 },
-        { label: "65세 이상 (어르신)", emoji: "👵", min: 65, max: 120 },
+        { label: "0~7세 (영유아·미취학)", min: 0, max: 7 },
+        { label: "8~18세 (학생)", min: 8, max: 18 },
+        { label: "19~34세 (청년)", min: 19, max: 34 },
+        { label: "35~59세 (중장년)", min: 35, max: 59 },
+        { label: "60~64세", min: 60, max: 64 },
+        { label: "65세 이상 (어르신)", min: 65, max: 120 },
       ];
       const grid = el("div", { class: "choice-grid", role: "radiogroup", "aria-label": "연령대 선택" });
       bands.forEach((b) => {
@@ -148,7 +147,7 @@ const steps = [
             state.profile.ageLabel = b.label;
             renderWizard();
           },
-        }, [el("span", { class: "choice-emoji", "aria-hidden": "true", text: b.emoji }), b.label]);
+        }, b.label);
         grid.appendChild(btn);
       });
       box.appendChild(grid);
@@ -215,12 +214,12 @@ const steps = [
     help: "한부모 가구라면 아동양육비 지원, 자녀가 있다면 아동수당 등 가족 형태에 따라 받을 수 있는 복지가 달라져요.",
     render(box) {
       const options = [
-        { label: "혼자 살아요 (1인 가구)", emoji: "🏠", value: "1인 가구" },
-        { label: "부부 둘이 살아요", emoji: "👫", value: "부부" },
-        { label: "자녀가 있어요", emoji: "👨‍👩‍👧", value: "자녀 있는 가구" },
-        { label: "한부모 가구예요", emoji: "👩‍👧", value: "한부모 가구" },
-        { label: "조부모가 손주를 키워요 (조손 가구)", emoji: "👵👦", value: "조손 가구" },
-        { label: "기타", emoji: "🏘️", value: "기타" },
+        { label: "혼자 살아요 (1인 가구)", value: "1인 가구" },
+        { label: "부부 둘이 살아요", value: "부부" },
+        { label: "자녀가 있어요", value: "자녀 있는 가구" },
+        { label: "한부모 가구예요", value: "한부모 가구" },
+        { label: "조부모가 손주를 키워요 (조손 가구)", value: "조손 가구" },
+        { label: "기타", value: "기타" },
       ];
       const grid = el("div", { class: "choice-grid", role: "radiogroup", "aria-label": "가구 형태 선택" });
       options.forEach((o) => {
@@ -234,7 +233,7 @@ const steps = [
             if (!hasChildHousehold()) state.profile.childAges = [];
             renderWizard();
           },
-        }, [el("span", { class: "choice-emoji", "aria-hidden": "true", text: o.emoji }), o.label]));
+        }, o.label));
       });
       box.appendChild(grid);
     },
@@ -253,11 +252,11 @@ const steps = [
     skip() { return !hasChildHousehold(); },
     render(box) {
       const options = [
-        { label: "영아 (0~1세)", emoji: "🍼", value: "영아" },
-        { label: "미취학 (2~7세)", emoji: "🧸", value: "미취학" },
-        { label: "초등학생", emoji: "✏️", value: "초등" },
-        { label: "중·고등학생", emoji: "📚", value: "중고등" },
-        { label: "성인 자녀", emoji: "🧑", value: "성인" },
+        { label: "영아 (0~1세)", value: "영아" },
+        { label: "미취학 (2~7세)", value: "미취학" },
+        { label: "초등학생", value: "초등" },
+        { label: "중·고등학생", value: "중고등" },
+        { label: "성인 자녀", value: "성인" },
       ];
       box.appendChild(renderMultiGrid(options, state.profile.childAges, "자녀 나이 선택"));
     },
@@ -305,7 +304,6 @@ const steps = [
             renderWizard();
           },
         }, [
-          el("span", { class: "choice-emoji", "aria-hidden": "true", text: "💰" }),
           el("span", {}, [o.label, el("span", { class: "choice-sub", text: o.sub })]),
         ]));
       });
@@ -354,7 +352,7 @@ const steps = [
             },
           }, "소득 구간 계산하기"),
           state.profile.incomeLabel.startsWith("추정")
-            ? el("p", { class: "estimate-result", text: `✅ ${state.profile.incomeLabel} 구간으로 추정돼요. 다음으로 진행해 주세요.` })
+            ? el("p", { class: "estimate-result", text: `${state.profile.incomeLabel} 구간으로 추정돼요. 다음으로 진행해 주세요.` })
             : null,
           el("p", { class: "card-note", text: "※ 2026년 기준 중위소득 예시표로 계산한 대략적인 추정이에요. 정확한 판정은 신청 기관에서 소득·재산을 함께 조사해 결정합니다." }),
         ]);
@@ -376,8 +374,8 @@ const steps = [
     render(box) {
       const grid = el("div", { class: "choice-grid", role: "radiogroup", "aria-label": "장애 여부 선택" });
       [
-        { label: "없어요", emoji: "🙅", value: "없음" },
-        { label: "등록장애가 있어요", emoji: "♿", value: "있음" },
+        { label: "없어요", value: "없음" },
+        { label: "등록장애가 있어요", value: "있음" },
       ].forEach((o) => {
         const selected = o.value === "없음"
           ? state.profile.disability === "없음"
@@ -390,7 +388,7 @@ const steps = [
             state.profile.disability = o.value === "없음" ? "없음" : (state.profile.disability === "없음" ? "경증" : state.profile.disability);
             renderWizard();
           },
-        }, [el("span", { class: "choice-emoji", "aria-hidden": "true", text: o.emoji }), o.label]));
+        }, o.label));
       });
       box.appendChild(grid);
 
@@ -429,15 +427,15 @@ const steps = [
     help: "예를 들어 '갑작스러운 위기'는 실직, 큰 병, 가족의 사망 등으로 생계가 갑자기 어려워진 경우예요. 이럴 땐 긴급복지 지원을 빠르게 받을 수 있어요.",
     render(box) {
       const options = [
-        { label: "일자리를 찾고 있어요", emoji: "🔍", value: "구직 중" },
-        { label: "최근에 실직·이직했어요", emoji: "💼", value: "실직·이직" },
-        { label: "학생·대학생이에요", emoji: "🎓", value: "학생·대학생" },
-        { label: "출산 예정이거나 출산 직후예요", emoji: "🤱", value: "출산 예정·직후" },
-        { label: "어르신 돌봄이 필요해요", emoji: "🧓", value: "노인 돌봄 필요" },
-        { label: "갑작스러운 위기가 생겼어요", sub: "실직·질병·사망 등", emoji: "🚨", value: "위기상황" },
-        { label: "주거비(월세 등)가 부담돼요", emoji: "🏠", value: "주거비 부담" },
-        { label: "의료비가 부담돼요", emoji: "🏥", value: "의료비 부담" },
-        { label: "해당 없어요", emoji: "✅", value: "해당 없음", exclusive: true },
+        { label: "일자리를 찾고 있어요", value: "구직 중" },
+        { label: "최근에 실직·이직했어요", value: "실직·이직" },
+        { label: "학생·대학생이에요", value: "학생·대학생" },
+        { label: "출산 예정이거나 출산 직후예요", value: "출산 예정·직후" },
+        { label: "어르신 돌봄이 필요해요", value: "노인 돌봄 필요" },
+        { label: "갑작스러운 위기가 생겼어요", sub: "실직·질병·사망 등", value: "위기상황" },
+        { label: "주거비(월세 등)가 부담돼요", value: "주거비 부담" },
+        { label: "의료비가 부담돼요", value: "의료비 부담" },
+        { label: "해당 없어요", value: "해당 없음", exclusive: true },
       ];
       box.appendChild(renderMultiGrid(options, state.profile.situations, "현재 상황 선택"));
     },
@@ -455,13 +453,13 @@ const steps = [
     help: "선택한 분야의 복지가 결과에서 더 위쪽에 나와요.",
     render(box) {
       const options = [
-        { label: "현금 지원", emoji: "💵", value: "현금" },
-        { label: "의료·건강", emoji: "🏥", value: "의료" },
-        { label: "주거", emoji: "🏠", value: "주거" },
-        { label: "교육·학비", emoji: "📖", value: "교육" },
-        { label: "일자리", emoji: "💪", value: "일자리" },
-        { label: "돌봄", emoji: "🤲", value: "돌봄" },
-        { label: "문화·바우처", emoji: "🎫", value: "문화" },
+        { label: "현금 지원", value: "현금" },
+        { label: "의료·건강", value: "의료" },
+        { label: "주거", value: "주거" },
+        { label: "교육·학비", value: "교육" },
+        { label: "일자리", value: "일자리" },
+        { label: "돌봄", value: "돌봄" },
+        { label: "문화·바우처", value: "문화" },
       ];
       box.appendChild(renderMultiGrid(options, state.profile.interests, "관심 분야 선택"));
     },
@@ -533,7 +531,6 @@ function renderMultiGrid(options, target, ariaLabel) {
         renderWizard();
       },
     }, [
-      el("span", { class: "choice-emoji", "aria-hidden": "true", text: o.emoji || "✔️" }),
       el("span", {}, [o.label, o.sub ? el("span", { class: "choice-sub", text: o.sub }) : null]),
     ]);
     grid.appendChild(btn);
@@ -558,10 +555,10 @@ function renderStart() {
     el("p", { text: `정부·지자체 복지 서비스 ${state.services.length}개 중에서 나에게 맞는 것을 찾아드려요.` }),
     el("p", { text: "8개의 쉬운 질문에 답하면 1분 안에 결과를 볼 수 있어요." }),
     el("div", { class: "hero-features" }, [
-      el("div", { class: "hero-feature", text: "📋 단계별 쉬운 질문" }),
-      el("div", { class: "hero-feature", text: "🎯 맞춤 추천 + 이유 설명" }),
-      el("div", { class: "hero-feature", text: "🔗 공식 신청 링크 안내" }),
-      el("div", { class: "hero-feature", text: "🔊 읽어주기·고대비 지원" }),
+      el("div", { class: "hero-feature", text: "단계별 쉬운 질문" }),
+      el("div", { class: "hero-feature", text: "맞춤 추천 + 이유 설명" }),
+      el("div", { class: "hero-feature", text: "공식 신청 링크 안내" }),
+      el("div", { class: "hero-feature", text: "읽어주기·고대비 지원" }),
     ]),
     el("button", {
       type: "button", class: "btn-primary",
@@ -596,18 +593,18 @@ function renderWizard() {
   ]));
 
   /* 질문 헤더 + 도구 */
-  const helpBox = el("div", { class: "help-box", hidden: "hidden", role: "note" }, "💡 " + step.help);
+  const helpBox = el("div", { class: "help-box", hidden: "hidden", role: "note" }, step.help);
   wizard.appendChild(el("div", { class: "q-head" }, [
     el("h2", { class: "q-title", id: "q-title", text: step.title }),
     el("div", { class: "q-tools" }, [
       el("button", {
-        type: "button", class: "icon-btn", "aria-label": "도움말 보기",
+        type: "button", class: "tool-btn", "aria-label": "도움말 보기",
         onclick: () => { helpBox.hidden = !helpBox.hidden; },
-      }, "❓"),
+      }, "도움말"),
       el("button", {
-        type: "button", class: "icon-btn", "aria-label": "질문 읽어주기",
+        type: "button", class: "tool-btn", "aria-label": "질문 읽어주기",
         onclick: () => speak(step.ttsText() + " " + step.help),
-      }, "🔊"),
+      }, "듣기"),
     ]),
   ]));
   wizard.appendChild(el("p", { class: "q-desc", text: step.desc }));
@@ -641,7 +638,7 @@ function renderWizard() {
       renderWizard();
       window.scrollTo(0, 0);
     },
-  }, step.isConfirm ? "🎯 결과 보기" : "다음 →"));
+  }, step.isConfirm ? "결과 보기" : "다음 →"));
   wizard.appendChild(nav);
 
   $app.appendChild(wizard);
@@ -912,36 +909,33 @@ function renderResults() {
   /* 헤더 */
   const totalFound = primary.length + secondary.length;
   const header = el("section", { class: "results-header" }, [
-    el("h2", { text: totalFound > 0 ? `🎉 총 ${totalFound}개의 복지 서비스를 찾았어요!` : "조건에 꼭 맞는 서비스를 찾지 못했어요" }),
+    el("h2", { text: totalFound > 0 ? `총 ${totalFound}개의 복지 서비스를 찾았어요` : "조건에 꼭 맞는 서비스를 찾지 못했어요" }),
     el("p", { text: totalFound > 0
       ? `맞춤 추천 ${primary.length}개${secondary.length ? `, 참고 서비스 ${secondary.length}개` : ""}를 적합한 순서로 보여드려요.`
       : "조건을 바꿔 다시 진단해 보시거나, 보건복지상담센터(☎129)에 문의해 보세요." }),
     el("div", { class: "results-actions" }, [
-      el("button", { type: "button", class: "btn-secondary", onclick: () => { resetProfile(); renderStart(); } }, "🔄 다시 진단하기"),
-      el("button", { type: "button", class: "btn-ghost", onclick: () => window.print() }, "🖨️ 인쇄·저장하기"),
+      el("button", { type: "button", class: "btn-secondary", onclick: () => { resetProfile(); renderStart(); } }, "다시 진단하기"),
+      el("button", { type: "button", class: "btn-ghost", onclick: () => window.print() }, "인쇄·저장하기"),
       el("button", {
         type: "button", class: "btn-ghost",
         onclick: () => {
           const names = primary.map((r, i) => `${i + 1}. ${r.svc.name}`).join(", ");
           speak(`총 ${totalFound}개의 복지 서비스를 찾았어요. 추천 순서대로, ${names} 입니다.`);
         },
-      }, "🔊 결과 읽어주기"),
+      }, "결과 읽어주기"),
     ]),
   ]);
   $app.appendChild(header);
 
-  /* AI 설명 설정 (방식 B: 키는 메모리에만 보관) */
-  $app.appendChild(renderAiSettings());
-
   if (primary.length > 0) {
-    $app.appendChild(el("h3", { class: "section-title", text: "🎯 맞춤 추천 서비스" }));
+    $app.appendChild(el("h3", { class: "section-title", text: "맞춤 추천 서비스" }));
     primary.forEach((r, i) => $app.appendChild(renderCard(r, i)));
   } else {
     $app.appendChild(el("div", { class: "no-results", text: "입력하신 조건에 맞는 서비스가 없어요. '다시 진단하기'로 조건을 바꿔 보세요." }));
   }
 
   if (secondary.length > 0) {
-    $app.appendChild(el("h3", { class: "section-title", text: "📌 참고하면 좋은 서비스" }));
+    $app.appendChild(el("h3", { class: "section-title", text: "참고하면 좋은 서비스" }));
     secondary.forEach((r, i) => $app.appendChild(renderCard(r, primary.length + i)));
   }
 
@@ -958,28 +952,6 @@ function resetProfile() {
   };
   state.stepIndex = 0;
   steps.forEach((s) => { if (s._unknownMode !== undefined) s._unknownMode = false; });
-}
-
-function renderAiSettings() {
-  const details = el("details", { class: "ai-settings" });
-  details.appendChild(el("summary", { text: "🤖 AI 맞춤 설명 설정 (선택)" }));
-  details.appendChild(el("p", { text: "기본으로 규칙 기반 설명이 제공돼요. Anthropic API 키를 입력하면 AI가 더 자연스러운 맞춤 설명을 만들어 드려요. 키는 저장되지 않고 이 화면에서만 사용돼요." }));
-  const input = el("input", {
-    type: "password", class: "text-input", placeholder: "sk-ant-...",
-    "aria-label": "Anthropic API 키 입력", value: state.apiKey,
-  });
-  const row = el("div", { class: "field-row" }, [
-    input,
-    el("button", {
-      type: "button", class: "btn-secondary",
-      onclick: () => {
-        state.apiKey = input.value.trim();
-        renderResults(); // AI 설명 다시 시도
-      },
-    }, "적용하고 AI 설명 생성"),
-  ]);
-  details.appendChild(row);
-  return details;
 }
 
 function renderCard(result, index) {
@@ -1002,7 +974,7 @@ function renderCard(result, index) {
   /* AI/규칙 기반 설명 블록 — 규칙 기반으로 즉시 채움 */
   const aiText = el("p", { class: "ai-text", text: ruleBasedExplanation(svc) });
   const aiBlock = el("div", { class: "ai-block", "data-service-id": String(svc.id) }, [
-    el("span", { class: "ai-label", text: "💡 왜 추천하나요?" }),
+    el("span", { class: "ai-label", text: "왜 추천하나요?" }),
     aiText,
   ]);
   card.appendChild(aiBlock);
@@ -1023,7 +995,7 @@ function renderCard(result, index) {
   ]));
 
   card.appendChild(el("div", { class: "apply-steps" }, [
-    el("strong", { text: "📝 신청 방법" }),
+    el("strong", { text: "신청 방법" }),
     el("span", { text: svc.apply_steps }),
   ]));
 
@@ -1035,10 +1007,10 @@ function renderCard(result, index) {
       class: "btn-primary", href: svc.url, target: "_blank", rel: "noopener noreferrer",
       "aria-label": `${svc.name} 공식 사이트에서 신청하기 (새 창)`,
     }, "공식 사이트에서 신청하기 →"),
-    el("button", { type: "button", class: "btn-secondary", onclick: speakAll, "aria-label": `${svc.name} 내용 읽어주기` }, "읽어주기 🔊"),
+    el("button", { type: "button", class: "btn-secondary", onclick: speakAll, "aria-label": `${svc.name} 내용 읽어주기` }, "읽어주기"),
   ]));
 
-  card.appendChild(el("p", { class: "card-note", text: "⚠️ 복지 제도의 금액·기준은 매년 바뀝니다. 정확한 최신 정보는 공식 사이트에서 확인하세요." }));
+  card.appendChild(el("p", { class: "card-note", text: "복지 제도의 금액·기준은 매년 바뀝니다. 정확한 최신 정보는 공식 사이트에서 확인하세요." }));
 
   return card;
 }
@@ -1073,28 +1045,17 @@ function ruleBasedExplanation(svc) {
   return parts.join(" ");
 }
 
-/* 방식 A(서버리스) → 방식 B(사용자 키) 순으로 시도. 실패해도 조용히 무시(폴백 유지) */
+/* 방식 A(서버리스)로 AI 설명 시도. 실패해도 조용히 무시(규칙 기반 설명 유지) */
 async function enhanceExplanations(results) {
   for (const r of results) {
     try {
+      if (state.serverlessAvailable === false) return;
       const block = document.querySelector(`.ai-block[data-service-id="${r.svc.id}"]`);
       if (!block) continue;
       const textEl = block.querySelector(".ai-text");
-      const ruleText = textEl.textContent;
-
-      let explanation = "";
-      if (state.serverlessAvailable !== false) {
-        explanation = await callServerlessExplain(r.svc);
-      }
-      if (!explanation && state.apiKey) {
-        block.classList.add("loading");
-        explanation = await callAnthropicDirect(r.svc);
-        block.classList.remove("loading");
-      }
+      const explanation = await callServerlessExplain(r.svc);
       if (explanation && explanation.trim()) {
-        textEl.textContent = explanation.trim() + " 🤖";
-      } else {
-        textEl.textContent = ruleText; // 폴백 유지
+        textEl.textContent = explanation.trim();
       }
     } catch (_e) {
       /* AI 실패로 앱이 멈추면 안 됨 — 규칙 기반 설명 그대로 유지 */
@@ -1115,41 +1076,6 @@ async function callServerlessExplain(svc) {
     return data.explanation || "";
   } catch (_e) {
     state.serverlessAvailable = false;
-    return "";
-  }
-}
-
-async function callAnthropicDirect(svc) {
-  try {
-    const prompt = `당신은 복지 안내 도우미입니다. 아래 사용자에게 이 복지 서비스가 왜 도움이 되는지 쉽고 따뜻한 말로 2~3문장으로 설명하세요. 전문용어 없이, 어르신도 이해할 수 있게.
-
-[사용자 상황]
-${JSON.stringify(publicProfile(), null, 2)}
-
-[복지 서비스]
-이름: ${svc.name}
-요약: ${svc.summary}
-지원내용: ${svc.support_amount}
-소득기준: ${svc.income_criteria}`;
-
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": state.apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-5",
-        max_tokens: 300,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    if (!res.ok) return "";
-    const data = await res.json();
-    return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
-  } catch (_e) {
     return "";
   }
 }
@@ -1186,7 +1112,7 @@ async function init() {
   } catch (e) {
     $app.innerHTML = "";
     $app.appendChild(el("div", { class: "no-results" }, [
-      el("h2", { text: "⚠️ 복지 데이터를 불러오지 못했어요" }),
+      el("h2", { text: "복지 데이터를 불러오지 못했어요" }),
       el("p", { html: "파일을 직접 더블클릭해서 열면 브라우저 보안 정책(CORS) 때문에 데이터를 읽을 수 없어요.<br>터미널에서 <code>python -m http.server 8000</code> 실행 후 <code>http://localhost:8000</code>으로 접속해 주세요.<br>자세한 방법은 README.md를 확인하세요." }),
     ]));
   }
